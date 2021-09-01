@@ -1,30 +1,35 @@
 #include <stdio.h>
 #include <ctype.h>
+#include "scanner.h"
 
-void printCadena(char *str, int *i){
-   if(str[0] != '\0'){
-      printf("Cadena de texto: %s\n", str);
-      *i = 0;
-      str[0] = '\0';
-   }
-}
-
-void get_token() {
-   int c;
+enum tokens get_token(char str[]){
+   char c;
    int i = 0;
-   char str[100] = {'\0'};
-   while ((c = getchar()) != EOF){
-      if( isspace(c) ) {
-         printCadena(str, &i);
-      } else if( c == ',' ) {
-         printCadena(str, &i);
-         printf("Separador: %c\n", c);
+   
+   while((c = getchar()) != EOF){
+      if ( isspace(c) ) {
+         if (i != 0) {
+            str[i] = '\0';
+            return CAD;
+         }
+      } else if (c == ',') {
+         if (i != 0) {
+            str[i] = '\0';
+            ungetc(c, stdin);
+            return CAD;
+         }
+         str[0] = c;
+         str[1] = '\0';
+         return SEP;
       } else {
          str[i] = c;
-         str[i+1] = '\0';
          i++;
       }
    }
-   printCadena(str, &i);
-   printf("Fin de Texto: %c", c);
+   if (i != 0) {
+      str[i] = '\0';
+      ungetc(c, stdin);
+      return CAD;
+   }
+   return FDT;
 }
